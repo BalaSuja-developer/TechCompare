@@ -20,7 +20,8 @@ const Navbar = () => {
     { name: 'Admin', href: '/admin', icon: null },
   ];
 
-  const navigation = isAdmin() ? adminNavigation : userNavigation;
+  // FIXED: Remove () - isAdmin is a boolean, not a function
+  const navigation = isAdmin ? adminNavigation : userNavigation;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -69,7 +70,8 @@ const Navbar = () => {
               <div className="flex items-center space-x-2">
                 <User className="h-4 w-4 text-gray-600" />
                 <span className="text-sm text-gray-600">{user?.username}</span>
-                {isAdmin() && (
+                {/* FIXED: Remove () - isAdmin is a boolean, not a function */}
+                {isAdmin && (
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
                     Admin
                   </span>
@@ -125,7 +127,8 @@ const Navbar = () => {
               <div className="flex items-center space-x-2 px-3 py-2">
                 <User className="h-4 w-4 text-gray-600" />
                 <span className="text-sm text-gray-600">{user?.username}</span>
-                {isAdmin() && (
+                {/* FIXED: Remove () - isAdmin is a boolean, not a function */}
+                {isAdmin && (
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
                     Admin
                   </span>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
@@ -11,34 +11,61 @@ import CompareProducts from './pages/CompareProducts';
 import PricePrediction from './pages/PricePrediction';
 import AdminDashboard from './pages/AdminDashboard';
 
+function AppLayout() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Show Navbar only if logged in */}
+      {isAuthenticated && <Navbar />}
+      
+      <Routes>
+        {/* Public route */}
+        <Route path="/login" element={<Login />} />
+        
+        {/* Protected user routes */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        <Route path="/products" element={
+          <ProtectedRoute>
+            <ProductList />
+          </ProtectedRoute>
+        } />
+        <Route path="/products/:id" element={
+          <ProtectedRoute>
+            <ProductDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="/compare" element={
+          <ProtectedRoute>
+            <CompareProducts />
+          </ProtectedRoute>
+        } />
+        <Route path="/predict" element={
+          <ProtectedRoute>
+            <PricePrediction />
+          </ProtectedRoute>
+        } />
+        
+        {/* Admin route */}
+        <Route path="/admin" element={
+          <ProtectedRoute requireAdmin={true}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </div>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/*" element={
-              <ProtectedRoute>
-                <div>
-                  <Navbar />
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/products" element={<ProductList />} />
-                    <Route path="/products/:id" element={<ProductDetails />} />
-                    <Route path="/compare" element={<CompareProducts />} />
-                    <Route path="/predict" element={<PricePrediction />} />
-                    <Route path="/admin" element={
-                      <ProtectedRoute requireAdmin={true}>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } />
-                  </Routes>
-                </div>
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </div>
+        <AppLayout />
       </Router>
     </AuthProvider>
   );
