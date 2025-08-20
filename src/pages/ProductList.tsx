@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Star, Eye, Plus, Loader } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // TypeScript interfaces
 interface ProductSpecs {
-  display?: string;
+  display_size?: string;
   ram?: string;
   storage?: string;
 }
@@ -15,9 +16,9 @@ interface Product {
   brand: string;
   price: number;
   rating?: number;
-  image?: string;
+  image_url?: string;
   specs?: ProductSpecs;
-  display?: string;
+  display_size?: string;
   ram?: string;
   storage?: string;
 }
@@ -49,21 +50,28 @@ const ProductList: React.FC = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({
     min: 0,
-    max: 2000,
+    max: Infinity, // This ensures no products are filtered initially
   });
+
   const [selectedProducts, setSelectedProducts] = useState<(string | number)[]>(
     []
   );
 
+  const location = useLocation();
+  const navigate = useNavigate();
 
+  const [receivedProductIds, setReceivedProductIds] = useState<string[]>([]);
+  const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
 
   // Check if we're in development mode (simple browser-compatible check)
   const isDevelopment = () => {
     try {
-      return window.location.hostname === 'localhost' || 
-             window.location.hostname === '127.0.0.1' ||
-             window.location.hostname === '' ||
-             window.location.port !== '';
+      return (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === "" ||
+        window.location.port !== ""
+      );
     } catch {
       return false;
     }
@@ -74,16 +82,17 @@ const ProductList: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        
+
         // Get API URL from window object or use default
-        const apiBaseUrl = (window as any).API_BASE_URL || 'http://localhost:3001';
-        
+        const apiBaseUrl =
+          (window as any).API_BASE_URL || "http://localhost:3001";
+
         // Try different API URL patterns - prioritize the working localhost:3001
         const possibleUrls = [
           `${apiBaseUrl}/api/products?page=${currentPage}&limit=50`,
           `http://localhost:3001/api/products?page=${currentPage}&limit=50`,
           `/api/products?page=${currentPage}&limit=50`,
-          `http://localhost:8000/api/products?page=${currentPage}&limit=50`
+          `http://localhost:8000/api/products?page=${currentPage}&limit=50`,
         ];
 
         let lastError: Error | null = null;
@@ -92,29 +101,33 @@ const ProductList: React.FC = () => {
         for (const url of possibleUrls) {
           try {
             console.log(`Trying API URL: ${url}`);
-            
+
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
-            
+
             const response = await fetch(url, {
-              method: 'GET',
+              method: "GET",
               headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
+                Accept: "application/json",
+                "Content-Type": "application/json",
               },
-              signal: controller.signal
+              signal: controller.signal,
             });
 
             clearTimeout(timeoutId);
 
             // Check if response is HTML (error page)
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('text/html')) {
-              throw new Error(`API returned HTML instead of JSON. Check if ${url} is the correct endpoint.`);
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+              throw new Error(
+                `API returned HTML instead of JSON. Check if ${url} is the correct endpoint.`
+              );
             }
 
             if (!response.ok) {
-              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              throw new Error(
+                `HTTP ${response.status}: ${response.statusText}`
+              );
             }
 
             const data: APIResponse = await response.json();
@@ -141,17 +154,18 @@ const ProductList: React.FC = () => {
               break;
             }
           } catch (err) {
-            lastError = err instanceof Error ? err : new Error('Unknown error');
+            lastError = err instanceof Error ? err : new Error("Unknown error");
             console.warn(`Failed to fetch from ${url}:`, err);
           }
         }
 
         if (!success) {
-          throw lastError || new Error('All API endpoints failed');
+          throw lastError || new Error("All API endpoints failed");
         }
       } catch (err) {
         console.error("Error fetching products:", err);
-        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+        const errorMessage =
+          err instanceof Error ? err.message : "An unknown error occurred";
         setError(errorMessage);
         setProducts([]);
       } finally {
@@ -161,6 +175,22 @@ const ProductList: React.FC = () => {
 
     fetchProducts();
   }, [currentPage]);
+
+  useEffect(() => {
+    // Check if we received selected product IDs from ProductList
+    if (location.state?.selectedProductIds) {
+      const ids = location.state.selectedProductIds.map((id: string | number) =>
+        String(id)
+      );
+      setReceivedProductIds(ids);
+      fetchSpecificProducts(ids);
+    }
+    // Remove these lines - they don't exist in ProductList component
+    // else {
+    //   fetchAvailableProducts();
+    //   fetchBrands();
+    // }
+  }, [location.state]);
 
   // Get unique brands from fetched products
   const brands = Array.from(
@@ -187,6 +217,42 @@ const ProductList: React.FC = () => {
         ? prev.filter((id) => id !== productId)
         : [...prev, productId]
     );
+  };
+  const fetchAvailableProducts = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/api/products");
+      const data: APIResponse = await response.json();
+      if (data.success) {
+        setAvailableProducts(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching available products:", err);
+    }
+  };
+
+  const fetchSpecificProducts = async (productIds: string[]) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:3001/api/products/compare",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productIds }),
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        setSelectedProducts(data.data);
+        setAvailableProducts(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching selected products:", error);
+      fetchAvailableProducts();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -256,8 +322,11 @@ const ProductList: React.FC = () => {
             <p className="text-sm text-gray-500 mt-1">
               Showing {filteredProducts.length} of {products.length} products
               {pagination.totalPages > 1 && (
-                <> (Page {pagination.currentPage} of {pagination.totalPages}) -
-                Total: {pagination.totalProducts}</>
+                <>
+                  {" "}
+                  (Page {pagination.currentPage} of {pagination.totalPages}) -
+                  Total: {pagination.totalProducts}
+                </>
               )}
             </p>
           )}
@@ -321,8 +390,15 @@ const ProductList: React.FC = () => {
             </div>
 
             {/* Compare Button */}
-            <Link
-              to="/compare"
+            <button
+              onClick={() => {
+                if (selectedProducts.length > 0) {
+                  navigate("/compare", {
+                    state: { selectedProductIds: selectedProducts },
+                  });
+                }
+              }}
+              disabled={selectedProducts.length === 0}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
                 selectedProducts.length > 0
                   ? "bg-blue-600 text-white hover:bg-blue-700"
@@ -330,7 +406,7 @@ const ProductList: React.FC = () => {
               }`}
             >
               <span>Compare ({selectedProducts.length})</span>
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -345,7 +421,7 @@ const ProductList: React.FC = () => {
               <div className="relative h-48 overflow-hidden">
                 <img
                   src={
-                    product.image ||
+                    product.image_url ||
                     "https://via.placeholder.com/300x200?text=No+Image"
                   }
                   alt={product.name}
@@ -391,7 +467,7 @@ const ProductList: React.FC = () => {
                 <div className="space-y-1 mb-4 text-sm text-gray-600">
                   <p>
                     <span className="font-medium">Display:</span>{" "}
-                    {product.specs?.display || product.display || "N/A"}
+                    {product.specs?.display_size || product.display_size || "N/A"}
                   </p>
                   <p>
                     <span className="font-medium">RAM:</span>{" "}
