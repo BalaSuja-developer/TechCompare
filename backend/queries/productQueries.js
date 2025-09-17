@@ -8,19 +8,19 @@ const productQueries = {
       p.name,
       p.brand,
       p.price,
-      p.image_url as image,
+      p.image_url,
       p.rating,
       p.reviews,
       p.created_at,
       p.updated_at,
       json_build_object(
-        'display', ps.display_size,
+        'display_size', ps.display_size,
         'processor', ps.processor,
         'ram', ps.ram,
         'storage', ps.storage,
         'camera', ps.camera,
         'battery', ps.battery,
-        'os', ps.operating_system
+        'operating_system', ps.operating_system
       ) as specs,
       array_agg(pf.feature_name) as features
     FROM products p
@@ -38,20 +38,20 @@ const productQueries = {
       p.name,
       p.brand,
       p.price,
-      p.image_url as image,
+      p.image_url,
       p.rating,
       p.reviews,
       p.description,
       p.created_at,
       p.updated_at,
       json_build_object(
-        'display', ps.display_size,
+        'display_size', ps.display_size,
         'processor', ps.processor,
         'ram', ps.ram,
         'storage', ps.storage,
         'camera', ps.camera,
         'battery', ps.battery,
-        'os', ps.operating_system
+        'operating_system', ps.operating_system
       ) as specs,
       array_agg(pf.feature_name) as features
     FROM products p
@@ -68,17 +68,17 @@ const productQueries = {
       p.name,
       p.brand,
       p.price,
-      p.image_url as image,
+      p.image_url,
       p.rating,
       p.reviews,
       json_build_object(
-        'display', ps.display_size,
+        'display_size', ps.display_size,
         'processor', ps.processor,
         'ram', ps.ram,
         'storage', ps.storage,
         'camera', ps.camera,
         'battery', ps.battery,
-        'os', ps.operating_system
+        'operating_system', ps.operating_system
       ) as specs,
       array_agg(pf.feature_name) as features
     FROM products p
@@ -100,17 +100,17 @@ const productQueries = {
       p.name,
       p.brand,
       p.price,
-      p.image_url as image,
+      p.image_url,
       p.rating,
       p.reviews,
       json_build_object(
-        'display', ps.display_size,
+        'display_size', ps.display_size,
         'processor', ps.processor,
         'ram', ps.ram,
         'storage', ps.storage,
         'camera', ps.camera,
         'battery', ps.battery,
-        'os', ps.operating_system
+        'operating_system', ps.operating_system
       ) as specs,
       array_agg(pf.feature_name) as features
     FROM products p
@@ -134,17 +134,17 @@ const productQueries = {
       p.name,
       p.brand,
       p.price,
-      p.image_url as image,
+      p.image_url,
       p.rating,
       p.reviews,
       json_build_object(
-        'display', ps.display_size,
+        'display_size', ps.display_size,
         'processor', ps.processor,
         'ram', ps.ram,
         'storage', ps.storage,
         'camera', ps.camera,
         'battery', ps.battery,
-        'os', ps.operating_system
+        'operating_system', ps.operating_system
       ) as specs,
       array_agg(pf.feature_name) as features
     FROM products p
@@ -187,6 +187,27 @@ const productQueries = {
     DELETE FROM products WHERE id = $1
   `,
 
+  // Delete product features
+  deleteProductFeatures: `
+  DELETE FROM product_features
+  WHERE product_id = $1
+`,
+
+  // Update product specs
+  updateProductSpecs: `
+  UPDATE product_specs
+  SET
+    display_size = $2,
+    processor = $3,
+    ram = $4,
+    storage = $5,
+    camera = $6,
+    battery = $7,
+    operating_system = $8
+  WHERE product_id = $1
+  RETURNING *
+`,
+
   // Get product count
   getProductCount: `
     SELECT COUNT(*) as total FROM products
@@ -204,7 +225,7 @@ const productQueries = {
       (SELECT COUNT(DISTINCT brand) FROM products) as total_brands,
       (SELECT AVG(rating) FROM products) as avg_rating,
       (SELECT COUNT(*) FROM predictions) as total_predictions
-  `
+  `,
 };
 
 module.exports = productQueries;

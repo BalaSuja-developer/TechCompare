@@ -18,19 +18,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // List all allowed origins
-    const allowed = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://localhost:5174'
-    ];
-    if (allowed.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not Allowed by CORS'));
-    }
-  },
+  origin: true, // Allow all origins during development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

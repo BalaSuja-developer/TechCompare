@@ -160,26 +160,22 @@ const authController = {
   // Register user (for future use)
   register: async (req, res) => {
     try {
-      const { username, password, role } = req.body;
-
+      const { username, password, role = 'user' } = req.body; // Default role to 'user'
       if (!username || !password) {
         return res.status(400).json({
           success: false,
           error: 'Username and password are required'
         });
       }
-
       // Hash password
       const saltRounds = 10;
       const passwordHash = await bcrypt.hash(password, saltRounds);
-
       // Create user in database
       const result = await query(authQueries.createUser, [username, passwordHash, role]);
       const newUser = result.rows[0];
-
       // Generate token
       const token = jwt.sign(
-        { 
+        {
           id: newUser.id,
           username: newUser.username,
           role: newUser.role
@@ -187,7 +183,6 @@ const authController = {
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN }
       );
-
       res.status(201).json({
         success: true,
         data: {
@@ -199,23 +194,21 @@ const authController = {
           token
         }
       });
-
     } catch (error) {
       console.error('Registration error:', error);
-      
+  
       if (error.code === '23505') { // Unique constraint violation
         return res.status(409).json({
           success: false,
           error: 'Username already exists'
         });
       }
-
       res.status(500).json({
         success: false,
         error: 'Registration failed'
       });
     }
-  }
+  }  
 };
 
 module.exports = authController;
