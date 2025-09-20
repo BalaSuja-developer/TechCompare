@@ -148,31 +148,6 @@ REACT_APP_API_URL=http://localhost:3001/api
 REACT_APP_ML_API_URL=http://localhost:5000/api
 ```
 
-## 📊 API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/verify` - Verify token
-
-### Products
-- `GET /api/products` - Get all products
-- `GET /api/products/:id` - Get product by ID
-- `GET /api/products/search` - Search products
-- `GET /api/products/filter` - Filter products
-- `POST /api/compare` - Compare products
-
-### ML Predictions
-- `POST /api/predict/price` - Predict product price
-- `GET /api/predict/history` - Get prediction history
-
-### Admin (Admin only)
-- `GET /api/admin/stats` - Get admin statistics
-- `POST /api/admin/products` - Create product
-- `PUT /api/admin/products/:id` - Update product
-- `DELETE /api/admin/products/:id` - Delete product
-- `POST /api/admin/retrain` - Retrain ML model
-
 ## 🤖 ML Model
 
 The price prediction model uses **Linear Regression** with the following features:
@@ -189,25 +164,6 @@ The model is automatically trained with sample data on startup. For production:
 1. Collect real product data
 2. Use the `/api/admin/retrain` endpoint
 3. Monitor model performance via `/api/model/status`
-
-## 👥 User Roles
-
-### Regular User
-- Browse and search products
-- Compare products side-by-side
-- Get ML price predictions
-- View prediction history
-
-### Admin User
-- All user capabilities
-- Manage products (CRUD operations)
-- Upload bulk data
-- Retrain ML models
-- View system statistics
-
-**Default Admin Credentials:**
-- Username: `admin`
-- Password: `1234`
 
 ## 🔒 Security Features
 
@@ -227,24 +183,6 @@ The application is fully responsive with:
 - Touch-friendly interfaces
 - Optimized performance
 
-## 🚀 Deployment
-
-### Backend & ML API
-- Use PM2 for process management
-- Set up reverse proxy with Nginx
-- Configure SSL certificates
-- Set production environment variables
-
-### Frontend
-- Build with `npm run build`
-- Deploy to CDN or static hosting
-- Configure environment variables
-
-### Database
-- Use managed PostgreSQL service
-- Set up regular backups
-- Configure connection pooling
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -262,7 +200,6 @@ This project is licensed under the MIT License.
 For support and questions:
 - Create an issue on GitHub
 - Check the documentation
-- Review the API endpoints
 
 ---
 
