@@ -862,7 +862,7 @@ class AdvancedMobileSpecificationMatcher:
             logger.error(f"Error fetching user predictions: {str(e)}")
             return []
     
-    def save_model(self):
+    def save_models(self):
         """Save the trained model"""
         os.makedirs('model', exist_ok=True)
         
