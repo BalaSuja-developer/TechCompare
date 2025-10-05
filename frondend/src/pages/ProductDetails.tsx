@@ -166,14 +166,14 @@ const ProductDetails = () => {
             </div>
 
             {/* Action Buttons */}
-            {/* <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-              <Link
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+              {/* <Link
                 to="/predict"
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 flex-1"
               >
                 <Zap className="h-5 w-5" />
                 <span>Predict Price</span>
-              </Link>
+              </Link> */}
               <Link
                 to="/compare"
                 className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2 flex-1"
@@ -181,7 +181,7 @@ const ProductDetails = () => {
                 <BarChart3 className="h-5 w-5" />
                 <span>Compare</span>
               </Link>
-            </div> */}
+            </div>
 
             {/* Features */}
             {product.features && product.features.length > 0 && (

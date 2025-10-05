@@ -11,7 +11,7 @@ const Navbar = () => {
   const userNavigation = [
     { name: 'Home', href: '/', icon: null },
     { name: 'Products', href: '/products', icon: null },
-    // { name: 'Compare', href: '/compare', icon: null },
+    { name: 'Compare', href: '/compare', icon: null },
     // { name: 'Predict Price', href: '/predict', icon: Zap },
   ];
 
